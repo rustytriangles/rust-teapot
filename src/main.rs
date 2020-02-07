@@ -13,8 +13,8 @@ const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
 fn generate_matrix(aspect_ratio: f32) -> cgmath::Matrix4<f32> {
     let mx_projection = cgmath::perspective(cgmath::Deg(45f32), aspect_ratio, 1.0, 10.0);
     let mx_view = cgmath::Matrix4::look_at(
-        cgmath::Point3::new(1.5f32, -5.0, 3.0),
-        cgmath::Point3::new(0f32, 0.0, 1.5),
+        cgmath::Point3::new(2.5f32, -5.0, 3.0),
+        cgmath::Point3::new(0f32, 0.0, 1.4),
         cgmath::Vector3::unit_z(),
     );
     let mx_correction = OPENGL_TO_WGPU_MATRIX;
@@ -84,13 +84,15 @@ fn main() {
 			       glsl_to_spirv::ShaderType::Fragment).unwrap()).unwrap());
 
 
+
 	// VERTEX buffer
     let vertex_size = std::mem::size_of::<teapot::Vertex>();
 	let (vertex_data, index_data) = teapot::create_vertices();
+	println!("num verts = {0}, num indices = {1}", vertex_data.len(), index_data.len());
     let vertex_buf = device.create_buffer_with_data(vertex_data.as_bytes(), wgpu::BufferUsage::VERTEX);
 
 	// INDEX buffer
-	let index_count = vertex_data.len();
+	let index_count = index_data.len();
     let index_buf = device.create_buffer_with_data(index_data.as_bytes(), wgpu::BufferUsage::INDEX);
 
 	// u_Transform
@@ -201,7 +203,7 @@ fn main() {
                             resolve_target: None,
                             load_op: wgpu::LoadOp::Clear,
                             store_op: wgpu::StoreOp::Store,
-                            clear_color: wgpu::Color::GREEN,
+                            clear_color: wgpu::Color::BLACK,
                         }],
                         depth_stencil_attachment: None,
                     });

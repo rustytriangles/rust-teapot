@@ -30,8 +30,8 @@ pub fn create_vertices() -> (Vec<Vertex>, Vec<u32>) {
 
 fn tesselate_patch(cpts: &Vec<Vec<Vertex>>) -> (Vec<Vertex>, Vec<u32>) {
 
-	let nr = 6;
-	let nc = 6;
+	let nr = 16;
+	let nc = 16;
 
 	let mut verts: Vec<Vertex> = Vec::with_capacity(nr * nc);
 
@@ -44,10 +44,10 @@ fn tesselate_patch(cpts: &Vec<Vec<Vertex>>) -> (Vec<Vertex>, Vec<u32>) {
 		let mv3 = mv * mv2;
 
 		let vp = [mv3, 3.0 * mv2 * v, 3.0 * mv * v2, v3];
-		let dv = [-3.0 + 6.0*v - 3.0*v2, 
-		      3.0*(1.0 - 4.0*v + 3.0*v2), 
-		      3.0*(      2.0*v - 3.0*v2), 
-				                 3.0*v2];
+		let _dv = [-3.0 + 6.0*v - 3.0*v2, 
+ 		       3.0*(1.0 - 4.0*v + 3.0*v2), 
+		       3.0*(      2.0*v - 3.0*v2), 
+				                  3.0*v2];
 
 		for c in 0..nc {
 			let u = c as f64 / (nc - 1) as f64;
@@ -58,10 +58,10 @@ fn tesselate_patch(cpts: &Vec<Vec<Vertex>>) -> (Vec<Vertex>, Vec<u32>) {
 			let mu3 = mu * mu2;
 
 			let up = [mu3, 3.0 * mu2 * u, 3.0 * mu * u2, u3];
-			let du = [-3.0 + 6.0*u - 3.0*u2, 
-				  3.0*(1.0 - 4.0*u + 3.0*u2), 
-				  3.0*(      2.0*u - 3.0*u2), 
-				                     3.0*u2];
+			let _du = [-3.0 + 6.0*u - 3.0*u2, 
+				   3.0*(1.0 - 4.0*u + 3.0*u2), 
+				   3.0*(      2.0*u - 3.0*u2), 
+				                      3.0*u2];
 
 			let w = [ up[0]*vp[0], up[1]*vp[0], up[2]*vp[0], up[3]*vp[0],
 			          up[0]*vp[1], up[1]*vp[1], up[2]*vp[1], up[3]*vp[1],    
