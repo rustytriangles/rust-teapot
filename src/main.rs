@@ -87,7 +87,7 @@ fn main() {
 
 	// VERTEX buffer
     let vertex_size = std::mem::size_of::<teapot::Vertex>();
-	let (vertex_data, index_data) = teapot::create_vertices();
+	let (vertex_data, _normal_data, _uv_data, index_data) = teapot::create_vertices(16, 16);
 	println!("num verts = {0}, num indices = {1}", vertex_data.len(), index_data.len());
     let vertex_buf = device.create_buffer_with_data(vertex_data.as_bytes(), wgpu::BufferUsage::VERTEX);
 
