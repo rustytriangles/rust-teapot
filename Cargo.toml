@@ -1,0 +1,15 @@
+[package]
+name = "triangle"
+version = "0.1.0"
+authors = ["Mike Garrity"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wgpu = { git = "https://github.com/gfx-rs/wgpu-rs" }
+winit = "0.20"
+env_logger = "0.7"
+glsl-to-spirv = "0.1"
+zerocopy = "0.2"
+cgmath = "0.17"
