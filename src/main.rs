@@ -75,35 +75,60 @@ fn main() {
 
     // read vertex shader from shader.vert
     let vs_module = device.create_shader_module(&wgpu::read_spirv(
-	glsl_to_spirv::compile(include_str!("shader.vsh"),
-			       glsl_to_spirv::ShaderType::Vertex).unwrap()).unwrap());
+        glsl_to_spirv::compile(include_str!("shader.vsh"),
+                               glsl_to_spirv::ShaderType::Vertex).unwrap()).unwrap());
 
     // read fragment shader from shader.frag
     let fs_module = device.create_shader_module(&wgpu::read_spirv(
-	glsl_to_spirv::compile(include_str!("shader.fsh"),
-			       glsl_to_spirv::ShaderType::Fragment).unwrap()).unwrap());
+        glsl_to_spirv::compile(include_str!("shader.fsh"),
+                               glsl_to_spirv::ShaderType::Fragment).unwrap()).unwrap());
 
+    // get teapot coordinates
+    let (vertex_data, normal_data, uv_data, index_data) = teapot::create_vertices(16, 16);
+    println!("num verts = {0}, num indices = {1}", vertex_data.len(), index_data.len());
 
-
-	// VERTEX buffer
+//    for i in 0..4 {
+//        let v0 = index_data[3*i+0] as usize;
+//        let v1 = index_data[3*i+1] as usize;
+//        let v2 = index_data[3*i+2] as usize;
+//    	println!("v0[{0}] = {1}, {2}, {3}", i, vertex_data[v0]._pos[0], vertex_data[v0]._pos[1], vertex_data[v0]._pos[2]);
+//    	println!("v1[{0}] = {1}, {2}, {3}", i, vertex_data[v1]._pos[0], vertex_data[v1]._pos[1], vertex_data[v1]._pos[2]);
+//    	println!("v2[{0}] = {1}, {2}, {3}", i, vertex_data[v2]._pos[0], vertex_data[v2]._pos[1], vertex_data[v2]._pos[2]);
+//    }
+//    for i in 10..14 {
+//        let v0 = index_data[3*i+0] as usize;
+//        let v1 = index_data[3*i+1] as usize;
+//        let v2 = index_data[3*i+2] as usize;
+//    	println!("v0[{0}] = {1}, {2}, {3}", i, vertex_data[v0]._pos[0], vertex_data[v0]._pos[1], vertex_data[v0]._pos[2]);
+//    	println!("v1[{0}] = {1}, {2}, {3}", i, vertex_data[v1]._pos[0], vertex_data[v1]._pos[1], vertex_data[v1]._pos[2]);
+//    	println!("v2[{0}] = {1}, {2}, {3}", i, vertex_data[v2]._pos[0], vertex_data[v2]._pos[1], vertex_data[v2]._pos[2]);
+//    }
+    
+    // VERTEX buffer
     let vertex_size = std::mem::size_of::<teapot::Vertex>();
-	let (vertex_data, _normal_data, _uv_data, index_data) = teapot::create_vertices(16, 16);
-	println!("num verts = {0}, num indices = {1}", vertex_data.len(), index_data.len());
     let vertex_buf = device.create_buffer_with_data(vertex_data.as_bytes(), wgpu::BufferUsage::VERTEX);
 
-	// INDEX buffer
-	let index_count = index_data.len();
+    // NORMAL buffer
+    let normal_size = std::mem::size_of::<[f32; 3]>();
+    let normal_buf = device.create_buffer_with_data(normal_data.as_bytes(), wgpu::BufferUsage::VERTEX);
+
+    // UV buffer
+    let uv_size = std::mem::size_of::<[f32; 2]>();
+    let uv_buf = device.create_buffer_with_data(uv_data.as_bytes(), wgpu::BufferUsage::VERTEX);
+
+    // INDEX buffer
+    let index_count = index_data.len();
     let index_buf = device.create_buffer_with_data(index_data.as_bytes(), wgpu::BufferUsage::INDEX);
 
-	// u_Transform
-	let aspect_ratio = 1.;
-	let mx_total = generate_matrix(aspect_ratio);
-	let mx_ref: &[f32; 16] = mx_total.as_ref();
-	let uniform_buf = device.create_buffer_with_data(mx_ref.as_bytes(),
-		wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
-	);
+    // u_Transform
+    let aspect_ratio = 1.;
+    let mx_total = generate_matrix(aspect_ratio);
+    let mx_ref: &[f32; 16] = mx_total.as_ref();
+    let uniform_buf = device.create_buffer_with_data(mx_ref.as_bytes(),
+        wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+    );
 
-	// Bind uniform_buf
+    // Bind uniform_buf
     let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         bindings: &[
             wgpu::BindGroupLayoutBinding {
@@ -116,14 +141,14 @@ fn main() {
     let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         layout: &bind_group_layout,
         bindings: &[
-		    wgpu::Binding {
+                    wgpu::Binding {
                 binding: 0,
                 resource: wgpu::BindingResource::Buffer {
                     buffer: &uniform_buf,
                     range: 0 .. 64,
                 },
             },
-		],
+                ],
     });
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         bind_group_layouts: &[&bind_group_layout],
@@ -155,17 +180,44 @@ fn main() {
         }],
         depth_stencil_state: None,
         index_format: wgpu::IndexFormat::Uint16,
-        vertex_buffers: &[wgpu::VertexBufferDescriptor {
+        vertex_buffers: 
+                        &[wgpu::VertexBufferDescriptor {
                 stride: vertex_size as wgpu::BufferAddress,
                 step_mode: wgpu::InputStepMode::Vertex,
                 attributes: &[
+                    // position [x,y,z,w]
                     wgpu::VertexAttributeDescriptor {
                         format: wgpu::VertexFormat::Float4,
                         offset: 0,
                         shader_location: 0,
                     },
-                ],
-        }],
+                                ]
+                          },
+                          wgpu::VertexBufferDescriptor {
+                stride: normal_size as wgpu::BufferAddress,
+                step_mode: wgpu::InputStepMode::Vertex,
+                attributes: &[
+                    // normal [x,y,z]
+                    wgpu::VertexAttributeDescriptor {
+                        format: wgpu::VertexFormat::Float3,
+                        offset: 0,
+                        shader_location: 1,
+                    },
+                                ]
+                          },
+                          wgpu::VertexBufferDescriptor {
+                stride: uv_size as wgpu::BufferAddress,
+                step_mode: wgpu::InputStepMode::Vertex,
+                attributes: &[
+                                        // uv [u,v]
+                    wgpu::VertexAttributeDescriptor {
+                        format: wgpu::VertexFormat::Float2,
+                        offset: 0,
+                        shader_location: 2,
+                    },
+                                ]
+                          },
+        ],
         sample_count: 1,
         sample_mask: !0,
         alpha_to_coverage_enabled: false,
@@ -209,9 +261,9 @@ fn main() {
                     });
                     rpass.set_pipeline(&render_pipeline);
                     rpass.set_bind_group(0, &bind_group, &[]);
-					rpass.set_index_buffer(&index_buf, 0);
-                    rpass.set_vertex_buffers(0, &[(&vertex_buf, 0)]);
-					rpass.draw_indexed(0 .. index_count as u32, 0, 0 .. 1);
+                                        rpass.set_index_buffer(&index_buf, 0);
+                    rpass.set_vertex_buffers(0, &[(&vertex_buf, 0), (&normal_buf, 0), (&uv_buf, 0)]);
+                                        rpass.draw_indexed(0 .. index_count as u32, 0, 0 .. 1);
                 }
 
                 queue.submit(&[encoder.finish()]);

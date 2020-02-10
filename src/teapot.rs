@@ -3,7 +3,7 @@ use zerocopy::{AsBytes, FromBytes};
 #[repr(C)]
 #[derive(Clone, Copy, AsBytes, FromBytes)]
 pub struct Vertex {
-    _pos: [f32; 4],
+    pub _pos: [f32; 4],
 }
 
 fn vtx(pos: [f32; 3]) -> Vertex {
