@@ -83,7 +83,7 @@ fn main() {
                                glsl_to_spirv::ShaderType::Fragment).unwrap()).unwrap());
 
     // get teapot coordinates
-    let (vertex_data, normal_data, uv_data, index_data) = teapot::create_vertices(16, 16);
+    let (vertex_data, normal_data, uv_data, index_data) = teapot::create_vertices(32, 32);
     println!("num verts = {0}, num indices = {1}", vertex_data.len(), index_data.len());
 
     // VERTEX buffer
@@ -130,7 +130,7 @@ fn main() {
                     range: 0 .. 64,
                 },
             },
-                ],
+        ],
     });
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         bind_group_layouts: &[&bind_group_layout],
@@ -160,7 +160,15 @@ fn main() {
             alpha_blend: wgpu::BlendDescriptor::REPLACE,
             write_mask: wgpu::ColorWrite::ALL,
         }],
-        depth_stencil_state: None,
+        depth_stencil_state: Some(wgpu::DepthStencilStateDescriptor {
+            format: wgpu::TextureFormat::Depth32Float,
+            depth_write_enabled: true,
+            depth_compare: wgpu::CompareFunction::Less,
+            stencil_front: wgpu::StencilStateFaceDescriptor::IGNORE,
+            stencil_back: wgpu::StencilStateFaceDescriptor::IGNORE,
+            stencil_read_mask: 0,
+            stencil_write_mask: 0,
+        }),
         index_format: wgpu::IndexFormat::Uint32,
         vertex_buffers: 
                 // position [x,y,z,w] f32
@@ -212,6 +220,20 @@ fn main() {
 
     let mut swap_chain = device.create_swap_chain(&surface, &sc_desc);
 
+    let mut depth_texture = device.create_texture(&wgpu::TextureDescriptor {
+        size: wgpu::Extent3d {
+            width: sc_desc.width,
+            height: sc_desc.height,
+            depth: 1,
+        },
+        array_layer_count: 1,
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: wgpu::TextureFormat::Depth32Float,
+        usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+    }).create_default_view();
+
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
         match event {
@@ -220,6 +242,22 @@ fn main() {
                 sc_desc.width = size.width;
                 sc_desc.height = size.height;
                 swap_chain = device.create_swap_chain(&surface, &sc_desc);
+
+                depth_texture = device.create_texture(&wgpu::TextureDescriptor {
+                    size: wgpu::Extent3d {
+                        width: sc_desc.width,
+                        height: sc_desc.height,
+                        depth: 1,
+                    },
+                    array_layer_count: 1,
+                    mip_level_count: 1,
+                    sample_count: 1,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: wgpu::TextureFormat::Depth32Float,
+                    usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+                }).create_default_view();
+
+
             }
             event::Event::RedrawRequested(_) => {
                 let frame = swap_chain
@@ -236,7 +274,15 @@ fn main() {
                             store_op: wgpu::StoreOp::Store,
                             clear_color: wgpu::Color::BLACK,
                         }],
-                        depth_stencil_attachment: None,
+                        depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
+                            attachment: &depth_texture,
+                            depth_load_op: wgpu::LoadOp::Clear,
+                            depth_store_op: wgpu::StoreOp::Store,
+                            stencil_load_op: wgpu::LoadOp::Clear,
+                            stencil_store_op: wgpu::StoreOp::Store,
+                            clear_depth: 1.0,
+                            clear_stencil: 0,
+                        }),
                     });
                     rpass.set_pipeline(&render_pipeline);
                     rpass.set_bind_group(0, &bind_group, &[]);
