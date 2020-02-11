@@ -12,17 +12,17 @@ fn vtx(pos: [f32; 3]) -> Vertex {
     }
 }
 
-pub fn create_vertices(nr: usize, nc: usize) -> (Vec<Vertex>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u32>) {
+pub fn create_vertices(nr: usize, nc: usize) -> (Vec<Vertex>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u16>) {
 	let cpts = control_points();
 	let mut vertices: Vec<Vertex> = Vec::with_capacity(12);
 	let mut normals: Vec<[f32; 3]> = Vec::with_capacity(12);
 	let mut uvs: Vec<[f32; 2]> = Vec::with_capacity(12);
-	let mut indices: Vec<u32> = Vec::with_capacity(12);
+	let mut indices: Vec<u16> = Vec::with_capacity(12);
 	for i in 0..32 {
 		let this_patch = &cpts[i];
 		let (mut patch_vertices, mut patch_normals, mut patch_uvs, patch_indices) = tesselate_patch(this_patch, nr, nc);
 
-		let base = vertices.len() as u32;
+		let base = vertices.len() as u16;
 		vertices.append(&mut patch_vertices);
 		normals.append(&mut patch_normals);
 		uvs.append(&mut patch_uvs);
@@ -47,7 +47,7 @@ fn cross(v0: [f64; 3], v1: [f64; 3]) -> [f64; 3]  {
 	[v0[1]*v1[2] + v0[2]*v1[1], v0[2]*v1[0] + v0[0]*v1[2], v0[0]*v1[1] + v0[1]*v1[2]]
 }
 
-fn tesselate_patch(cpts: &Vec<Vec<Vertex>>, nr: usize, nc: usize) -> (Vec<Vertex>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u32>) {
+fn tesselate_patch(cpts: &Vec<Vec<Vertex>>, nr: usize, nc: usize) -> (Vec<Vertex>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u16>) {
 
 	let mut verts: Vec<Vertex> = Vec::with_capacity(nr * nc);
 	let mut norms: Vec<[f32; 3]> = Vec::with_capacity(nr * nc);
@@ -128,15 +128,15 @@ fn tesselate_patch(cpts: &Vec<Vec<Vertex>>, nr: usize, nc: usize) -> (Vec<Vertex
 		}
 	}
 	
-	let mut indices: Vec<u32> = Vec::with_capacity(2 * 3 * (nr-1)*(nc-1));
+	let mut indices: Vec<u16> = Vec::with_capacity(2 * 3 * (nr-1)*(nc-1));
 	for r in 0..(nr-1) {
 		for c in 0..(nc-1) {
-			indices.push(( r   *nc + c  ) as u32);
-			indices.push(( r   *nc + c+1) as u32);
-			indices.push(((r+1)*nc + c+1) as u32);
-			indices.push(( r   *nc + c  ) as u32);
-			indices.push(((r+1)*nc + c+1) as u32);
-			indices.push(((r+1)*nc + c  ) as u32);
+			indices.push(( r   *nc + c  ) as u16);
+			indices.push(( r   *nc + c+1) as u16);
+			indices.push(((r+1)*nc + c+1) as u16);
+			indices.push(( r   *nc + c  ) as u16);
+			indices.push(((r+1)*nc + c+1) as u16);
+			indices.push(((r+1)*nc + c  ) as u16);
 		}
 	}
 
@@ -146,14 +146,13 @@ fn tesselate_patch(cpts: &Vec<Vec<Vertex>>, nr: usize, nc: usize) -> (Vec<Vertex
 
 fn control_points() -> Vec<Vec<Vec<Vertex>>> {
 	[
-		// 0
-		vec![vec![ vtx([ 1.4   , 0.0, 2.4    ]), vtx([ 1.4   ,-0.784 , 2.4    ]), vtx([ 0.784 ,-1.4   , 2.4    ]), vtx([ 0.0   ,-1.4   , 2.4    ]) ],
-			 vec![ vtx([ 1.4   , 0.0, 2.4    ]), vtx([ 1.4   ,-0.784 , 2.4    ]), vtx([ 0.784 ,-1.4   , 2.4    ]), vtx([ 0.0   ,-1.4   , 2.4    ]) ],
-			 vec![ vtx([ 1.3375, 0.0, 2.53125]), vtx([ 1.3375,-0.749 , 2.53125]), vtx([ 0.749 ,-1.3375, 2.53125]), vtx([ 0.0   ,-1.3375, 2.53125]) ],
-			 vec![ vtx([ 1.4375, 0.0, 2.53125]), vtx([ 1.4375,-0.805 , 2.53125]), vtx([ 0.805 ,-1.4375, 2.53125]), vtx([ 0.0   ,-1.4375, 2.53125]) ],
-			 vec![ vtx([ 1.5   , 0.0, 2.4    ]), vtx([ 1.5   ,-0.84  , 2.4    ]), vtx([ 0.84  ,-1.5   , 2.4    ]), vtx([ 0.0   ,-1.5   , 2.4    ]) ],
+	// 0
+	vec![vec![ vtx([ 1.4   , 0.0, 2.4    ]), vtx([ 1.4   ,-0.784 , 2.4    ]), vtx([ 0.784 ,-1.4   , 2.4    ]), vtx([ 0.0   ,-1.4   , 2.4    ]) ],
+	     vec![ vtx([ 1.3375, 0.0, 2.53125]), vtx([ 1.3375,-0.749 , 2.53125]), vtx([ 0.749 ,-1.3375, 2.53125]), vtx([ 0.0   ,-1.3375, 2.53125]) ],
+	     vec![ vtx([ 1.4375, 0.0, 2.53125]), vtx([ 1.4375,-0.805 , 2.53125]), vtx([ 0.805 ,-1.4375, 2.53125]), vtx([ 0.0   ,-1.4375, 2.53125]) ],
+	     vec![ vtx([ 1.5   , 0.0, 2.4    ]), vtx([ 1.5   ,-0.84  , 2.4    ]), vtx([ 0.84  ,-1.5   , 2.4    ]), vtx([ 0.0   ,-1.5   , 2.4    ]) ],
 		],
-		// 1             
+	// 1             
         vec![vec![ vtx([ 0.0   ,-1.4   , 2.4    ]), vtx([-0.784 ,-1.4   , 2.4    ]), vtx([-1.4   ,-0.784 , 2.4    ]), vtx([-1.4   , 0.0   , 2.4    ]) ], 
              vec![ vtx([ 0.0   ,-1.3375, 2.53125]), vtx([-0.749 ,-1.3375, 2.53125]), vtx([-1.3375,-0.749 , 2.53125]), vtx([-1.3375, 0.0   , 2.53125]) ],
              vec![ vtx([ 0.0   ,-1.4375, 2.53125]), vtx([-0.805 ,-1.4375, 2.53125]), vtx([-1.4375,-0.805 , 2.53125]), vtx([-1.4375, 0.0   , 2.53125]) ],

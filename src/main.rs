@@ -87,23 +87,6 @@ fn main() {
     let (vertex_data, normal_data, uv_data, index_data) = teapot::create_vertices(16, 16);
     println!("num verts = {0}, num indices = {1}", vertex_data.len(), index_data.len());
 
-//    for i in 0..4 {
-//        let v0 = index_data[3*i+0] as usize;
-//        let v1 = index_data[3*i+1] as usize;
-//        let v2 = index_data[3*i+2] as usize;
-//    	println!("v0[{0}] = {1}, {2}, {3}", i, vertex_data[v0]._pos[0], vertex_data[v0]._pos[1], vertex_data[v0]._pos[2]);
-//    	println!("v1[{0}] = {1}, {2}, {3}", i, vertex_data[v1]._pos[0], vertex_data[v1]._pos[1], vertex_data[v1]._pos[2]);
-//    	println!("v2[{0}] = {1}, {2}, {3}", i, vertex_data[v2]._pos[0], vertex_data[v2]._pos[1], vertex_data[v2]._pos[2]);
-//    }
-//    for i in 10..14 {
-//        let v0 = index_data[3*i+0] as usize;
-//        let v1 = index_data[3*i+1] as usize;
-//        let v2 = index_data[3*i+2] as usize;
-//    	println!("v0[{0}] = {1}, {2}, {3}", i, vertex_data[v0]._pos[0], vertex_data[v0]._pos[1], vertex_data[v0]._pos[2]);
-//    	println!("v1[{0}] = {1}, {2}, {3}", i, vertex_data[v1]._pos[0], vertex_data[v1]._pos[1], vertex_data[v1]._pos[2]);
-//    	println!("v2[{0}] = {1}, {2}, {3}", i, vertex_data[v2]._pos[0], vertex_data[v2]._pos[1], vertex_data[v2]._pos[2]);
-//    }
-    
     // VERTEX buffer
     let vertex_size = std::mem::size_of::<teapot::Vertex>();
     let vertex_buf = device.create_buffer_with_data(vertex_data.as_bytes(), wgpu::BufferUsage::VERTEX);
