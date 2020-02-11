@@ -63,8 +63,7 @@ fn main() {
             power_preference: wgpu::PowerPreference::Default,
         },
         wgpu::BackendBit::PRIMARY,
-    )
-    .unwrap();
+    ).unwrap();
 
     let (device, queue) = adapter.request_device(&wgpu::DeviceDescriptor {
         extensions: wgpu::Extensions {
@@ -124,9 +123,9 @@ fn main() {
     let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         layout: &bind_group_layout,
         bindings: &[
-                    wgpu::Binding {
-                binding: 0,
-                resource: wgpu::BindingResource::Buffer {
+                wgpu::Binding {
+                    binding: 0,
+                    resource: wgpu::BindingResource::Buffer {
                     buffer: &uniform_buf,
                     range: 0 .. 64,
                 },
@@ -162,48 +161,45 @@ fn main() {
             write_mask: wgpu::ColorWrite::ALL,
         }],
         depth_stencil_state: None,
-        index_format: wgpu::IndexFormat::Uint16,
+        index_format: wgpu::IndexFormat::Uint32,
         vertex_buffers: 
-                        &[wgpu::VertexBufferDescriptor {
-                stride: vertex_size as wgpu::BufferAddress,
-                step_mode: wgpu::InputStepMode::Vertex,
-                attributes: &[
-                    // position [x,y,z,w]
-                    wgpu::VertexAttributeDescriptor {
-                        format: wgpu::VertexFormat::Float4,
-                        offset: 0,
-                        shader_location: 0,
-                    },
-                                ]
-                          },
-                          wgpu::VertexBufferDescriptor {
-                stride: normal_size as wgpu::BufferAddress,
-                step_mode: wgpu::InputStepMode::Vertex,
-                attributes: &[
-                    // normal [x,y,z]
-                    wgpu::VertexAttributeDescriptor {
-                        format: wgpu::VertexFormat::Float3,
-                        offset: 0,
-                        shader_location: 1,
-                    },
-                                ]
-                          },
-                          wgpu::VertexBufferDescriptor {
-                stride: uv_size as wgpu::BufferAddress,
-                step_mode: wgpu::InputStepMode::Vertex,
-                attributes: &[
-                                        // uv [u,v]
-                    wgpu::VertexAttributeDescriptor {
-                        format: wgpu::VertexFormat::Float2,
-                        offset: 0,
-                        shader_location: 2,
-                    },
-                                ]
-                          },
-        ],
-        sample_count: 1,
-        sample_mask: !0,
-        alpha_to_coverage_enabled: false,
+                // position [x,y,z,w] f32
+                &[wgpu::VertexBufferDescriptor {
+                    stride: vertex_size as wgpu::BufferAddress,
+                    step_mode: wgpu::InputStepMode::Vertex,
+                    attributes: &[
+                        wgpu::VertexAttributeDescriptor {
+                            format: wgpu::VertexFormat::Float4,
+                            offset: 0,
+                            shader_location: 0,
+                        },
+                     ]},
+                 // normal [x,y,z] f32
+                 wgpu::VertexBufferDescriptor {
+                    stride: normal_size as wgpu::BufferAddress,
+                    step_mode: wgpu::InputStepMode::Vertex,
+                    attributes: &[
+                        wgpu::VertexAttributeDescriptor {
+                            format: wgpu::VertexFormat::Float3,
+                            offset: 0,
+                            shader_location: 1,
+                        },
+                    ]},
+                  // uv [u,v] f32
+                 wgpu::VertexBufferDescriptor {
+                    stride: uv_size as wgpu::BufferAddress,
+                    step_mode: wgpu::InputStepMode::Vertex,
+                    attributes: &[
+                        wgpu::VertexAttributeDescriptor {
+                            format: wgpu::VertexFormat::Float2,
+                            offset: 0,
+                            shader_location: 2,
+                        },
+                    ]},
+                ],
+            sample_count: 1,
+            sample_mask: !0,
+            alpha_to_coverage_enabled: false,
     });
 
     let mut sc_desc = wgpu::SwapChainDescriptor {
