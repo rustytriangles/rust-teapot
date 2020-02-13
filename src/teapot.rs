@@ -1,26 +1,11 @@
-use zerocopy::{AsBytes, FromBytes};
-
-//use cgmath::{Vector3};
 use cgmath::*;
-
-#[repr(C)]
-#[derive(Clone, Copy, AsBytes, FromBytes)]
-pub struct Vertex {
-    pub _pos: [f32; 4],
-}
-
-fn vtx(pos: [f32; 3]) -> Vertex {
-    Vertex {
-        _pos: [pos[0], pos[1], pos[2], 1.0],
-    }
-}
 
 pub fn create_vertices(
     nr: usize,
     nc: usize,
-) -> (Vec<Vertex>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u32>) {
+) -> (Vec<[f32; 4]>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u32>) {
     let cpts = control_points();
-    let mut vertices: Vec<Vertex> = Vec::with_capacity(12);
+    let mut vertices: Vec<[f32; 4]> = Vec::with_capacity(12);
     let mut normals: Vec<[f32; 3]> = Vec::with_capacity(12);
     let mut uvs: Vec<[f32; 2]> = Vec::with_capacity(12);
     let mut indices: Vec<u32> = Vec::with_capacity(12);
@@ -44,7 +29,7 @@ fn tesselate_patch(
     cpts: &Vec<Vec<Point3<f32>>>,
     nr: usize,
     nc: usize,
-) -> (Vec<Vertex>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u32>) {
+) -> (Vec<[f32; 4]>, Vec<[f32; 3]>, Vec<[f32; 2]>, Vec<u32>) {
     let mut verts: Vec<[f32; 4]> = Vec::with_capacity(nr * nc);
     let mut norms: Vec<[f32; 3]> = Vec::with_capacity(nr * nc);
     let mut uvs: Vec<[f32; 2]> = Vec::with_capacity(nr * nc);
@@ -157,7 +142,7 @@ fn tesselate_patch(
                 }
             }
 
-            verts.push(vtx([pt[0] as f32, pt[1] as f32, pt[2] as f32]));
+            verts.push([pt[0] as f32, pt[1] as f32, pt[2] as f32, 1.0]);
             let normal = tan1.normalize().cross(tan2.normalize());
             norms.push([normal[0] as f32, normal[1] as f32, normal[2] as f32]);
             let uv = [u as f32, v as f32];

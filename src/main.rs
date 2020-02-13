@@ -103,7 +103,7 @@ fn main() {
     );
 
     // VERTEX buffer
-    let vertex_size = std::mem::size_of::<teapot::Vertex>();
+    let vertex_size = std::mem::size_of::<[f32; 4]>();
     let vertex_buf =
         device.create_buffer_with_data(vertex_data.as_bytes(), wgpu::BufferUsage::VERTEX);
 
