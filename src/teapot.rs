@@ -16,13 +16,13 @@ pub fn create_vertices(
 
         // tesselate this patch
         let this_patch = &cpts[i];
-        let (mut patch_vertices, mut patch_normals, mut patch_uvs, patch_indices) =
+        let (patch_vertices, patch_normals, patch_uvs, patch_indices) =
             tesselate_patch(this_patch, nr, nc);
 
         // append to buffers
-        vertices.append(&mut patch_vertices);
-        normals.append(&mut patch_normals);
-        uvs.append(&mut patch_uvs);
+        vertices.extend_from_slice(&patch_vertices);
+        normals.extend_from_slice(&patch_normals);
+        uvs.extend_from_slice(&patch_uvs);
 
         // indices have to be rebased
         for j in patch_indices {
