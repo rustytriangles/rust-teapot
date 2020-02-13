@@ -42,13 +42,13 @@ fn tesselate_patch(
         let mv2 = mv * mv;
         let mv3 = mv * mv2;
 
-        let vp = [mv3, 3.0 * mv2 * v, 3.0 * mv * v2, v3];
-        let dv = [
+        let vp = Vector4::new(mv3, 3.0 * mv2 * v, 3.0 * mv * v2, v3);
+        let dv = Vector4::new(
             -3.0 + 6.0 * v - 3.0 * v2,
             3.0 * (1.0 - 4.0 * v + 3.0 * v2),
             3.0 * (2.0 * v - 3.0 * v2),
             3.0 * v2,
-        ];
+        );
 
         for c in 0..nc {
             let u = c as f64 / (nc - 1) as f64;
@@ -58,15 +58,15 @@ fn tesselate_patch(
             let mu2 = mu * mu;
             let mu3 = mu * mu2;
 
-            let up = [mu3, 3.0 * mu2 * u, 3.0 * mu * u2, u3];
-            let du = [
+            let up = Vector4::new(mu3, 3.0 * mu2 * u, 3.0 * mu * u2, u3);
+            let du = Vector4::new(
                 -3.0 + 6.0 * u - 3.0 * u2,
                 3.0 * (1.0 - 4.0 * u + 3.0 * u2),
                 3.0 * (2.0 * u - 3.0 * u2),
                 3.0 * u2,
-            ];
+            );
 
-            let w = [
+            let w = Matrix4::new(
                 up[0] * vp[0],
                 up[1] * vp[0],
                 up[2] * vp[0],
@@ -83,9 +83,9 @@ fn tesselate_patch(
                 up[1] * vp[3],
                 up[2] * vp[3],
                 up[3] * vp[3],
-            ];
+            );
 
-            let dwdv = [
+            let dwdv = Matrix4::new(
                 du[0] * vp[0],
                 du[1] * vp[0],
                 du[2] * vp[0],
@@ -102,9 +102,9 @@ fn tesselate_patch(
                 du[1] * vp[3],
                 du[2] * vp[3],
                 du[3] * vp[3],
-            ];
+            );
 
-            let dwdu = [
+            let dwdu = Matrix4::new(
                 up[0] * dv[0],
                 up[1] * dv[0],
                 up[2] * dv[0],
@@ -121,24 +121,22 @@ fn tesselate_patch(
                 up[1] * dv[3],
                 up[2] * dv[3],
                 up[3] * dv[3],
-            ];
+            );
 
             let mut pt = Vector3::new(0f64, 0f64, 0f64);
             let mut tan1 = Vector3::new(0f64, 0f64, 0f64);
             let mut tan2 = Vector3::new(0f64, 0f64, 0f64);
             for a in 0..4 {
                 for b in 0..4 {
-                    let index = 4 * a + b;
-
                     let cpt = Vector3::new(
                         cpts[a][b].x as f64,
                         cpts[a][b].y as f64,
                         cpts[a][b].z as f64,
                     );
 
-                    pt += w[index] * cpt;
-                    tan1 += dwdv[index] * cpt;
-                    tan2 += dwdu[index] * cpt;
+                    pt += w[a][b] * cpt;
+                    tan1 += dwdv[a][b] * cpt;
+                    tan2 += dwdu[a][b] * cpt;
                 }
             }
 
