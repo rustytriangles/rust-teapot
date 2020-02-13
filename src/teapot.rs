@@ -1,3 +1,5 @@
+﻿// Teapot demo © 2020 RustyTriangles LLC
+
 use cgmath::*;
 
 pub fn create_vertices(

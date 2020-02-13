@@ -1,3 +1,5 @@
+﻿// Teapot demo © 2020 RustyTriangles LLC
+
 #[path = "teapot.rs"]
 mod teapot;
 
