@@ -1,5 +1,9 @@
 use zerocopy::{AsBytes, FromBytes};
 
+//use cgmath::{Vector3};
+use cgmath::*;
+
+
 #[repr(C)]
 #[derive(Clone, Copy, AsBytes, FromBytes)]
 pub struct Vertex {
@@ -35,24 +39,6 @@ pub fn create_vertices(
         }
     }
     (vertices, normals, uvs, indices)
-}
-
-fn normalize(v: [f64; 3]) -> [f64; 3] {
-    let l2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-    if l2 > 1e-20 {
-        let inv = 1. / l2.sqrt();
-        ([inv * v[0], inv * v[1], inv * v[2]])
-    } else {
-        (v)
-    }
-}
-
-fn cross(v0: [f64; 3], v1: [f64; 3]) -> [f64; 3] {
-    [
-        v0[1] * v1[2] + v0[2] * v1[1],
-        v0[2] * v1[0] + v0[0] * v1[2],
-        v0[0] * v1[1] + v0[1] * v1[2],
-    ]
 }
 
 fn tesselate_patch(
@@ -115,7 +101,7 @@ fn tesselate_patch(
                 up[3] * vp[3],
             ];
 
-            let dudv = [
+            let dwdv = [
                 du[0] * vp[0],
                 du[1] * vp[0],
                 du[2] * vp[0],
@@ -134,7 +120,7 @@ fn tesselate_patch(
                 du[3] * vp[3],
             ];
 
-            let dvdu = [
+            let dwdu = [
                 up[0] * dv[0],
                 up[1] * dv[0],
                 up[2] * dv[0],
@@ -153,32 +139,22 @@ fn tesselate_patch(
                 up[3] * dv[3],
             ];
 
-            let mut pt = [0.0, 0.0, 0.0];
-            let mut tan1 = [0.0, 0.0, 0.0];
-            let mut tan2 = [0.0, 0.0, 0.0];
+            let mut pt = Vector3::new(0f64,0f64,0f64);
+            let mut tan1 = Vector3::new(0f64,0f64,0f64);
+            let mut tan2 = Vector3::new(0f64,0f64,0f64);
             for a in 0..4 {
                 for b in 0..4 {
                     let index = 4 * a + b;
 
-                    let x = cpts[a][b]._pos[0] as f64;
-                    let y = cpts[a][b]._pos[1] as f64;
-                    let z = cpts[a][b]._pos[2] as f64;
+                    let cpt = Vector3::new(cpts[a][b]._pos[0] as f64, cpts[a][b]._pos[1] as f64, cpts[a][b]._pos[2] as f64);
 
-                    pt[0] += w[index] * x;
-                    pt[1] += w[index] * y;
-                    pt[2] += w[index] * z;
-
-                    tan1[0] += dudv[index] * x;
-                    tan1[1] += dudv[index] * y;
-                    tan1[2] += dudv[index] * z;
-
-                    tan2[0] += dvdu[index] * x;
-                    tan2[1] += dvdu[index] * y;
-                    tan2[2] += dvdu[index] * z;
+                    pt += w[index] * cpt;
+                    tan1 += dwdv[index] * cpt;
+                    tan2 += dwdu[index] * cpt;
                 }
             }
             verts.push(vtx([pt[0] as f32, pt[1] as f32, pt[2] as f32]));
-            let normal = cross(normalize(tan1), normalize(tan2));
+            let normal = tan1.normalize().cross(tan2.normalize());
             norms.push([normal[0] as f32, normal[1] as f32, normal[2] as f32]);
             let uv = [u as f32, v as f32];
             uvs.push(uv);
