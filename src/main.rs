@@ -8,7 +8,7 @@ const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
 );
 
 fn generate_matrix(aspect_ratio: f32) -> cgmath::Matrix4<f32> {
-    let mx_projection = cgmath::perspective(cgmath::Deg(40f32), aspect_ratio, 1.0, 10.0);
+    let mx_projection = cgmath::perspective(cgmath::Deg(35f32), aspect_ratio, 1.0, 10.0);
     let mx_view = cgmath::Matrix4::look_at(
         cgmath::Point3::new(3.5f32, 7.0, 7.0),
         cgmath::Point3::new(0.5f32, 0.0, 1.4),
@@ -125,6 +125,8 @@ fn main() {
 
     // u_Transform
     let aspect_ratio = 1.;
+    let mut prev_width = 0;
+    let mut prev_height = 0;
     let mx_total = generate_matrix(aspect_ratio);
     let mx_ref: &[f32; 16] = mx_total.as_ref();
     let uniform_buf = device.create_buffer_with_data(
@@ -140,7 +142,7 @@ fn main() {
             ty: wgpu::BindingType::UniformBuffer { dynamic: false },
         }],
     });
-    let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+    let mut bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
         layout: &bind_group_layout,
         bindings: &[wgpu::Binding {
             binding: 0,
@@ -306,6 +308,30 @@ fn main() {
                             },
                         ),
                     });
+
+                    // if window aspect ratio changed, we have to recreate matrix
+                    if sc_desc.width != prev_width || sc_desc.height != prev_height {
+                        let aspect_ratio = sc_desc.width as f32 / sc_desc.height as f32;
+                        let mx_total = generate_matrix(aspect_ratio);
+                        let mx_ref: &[f32; 16] = mx_total.as_ref();
+                        let uniform_buf = device.create_buffer_with_data(
+                            mx_ref.as_bytes(),
+                            wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+                        );
+                        bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                            layout: &bind_group_layout,
+                            bindings: &[wgpu::Binding {
+                                binding: 0,
+                                resource: wgpu::BindingResource::Buffer {
+                                    buffer: &uniform_buf,
+                                    range: 0..64,
+                                },
+                            }],
+                        });
+                        prev_width = sc_desc.width;
+                        prev_height = sc_desc.height;
+                    }
+
                     rpass.set_pipeline(&render_pipeline);
                     rpass.set_bind_group(0, &bind_group, &[]);
                     rpass.set_index_buffer(&index_buf, 0);
