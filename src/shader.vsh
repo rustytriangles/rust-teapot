@@ -17,7 +17,7 @@ void main() {
     float ks = 0.75;
     float specExp = 24;
 
-    vec3 lightVec = vec3(-0.5 * 0.7071, 0.7071,  0.866 * 0.7071);
+    vec3 lightVec = vec3(0.5 * 0.7071, 0.7071,  0.866 * 0.7071);
     vec3 lightColor = vec3(1);
     vec3 matColor = vec3(0.5, 0.25, 1);
     vec3 eyeVec = vec3(0, 0, 1);
