@@ -10,14 +10,19 @@ pub fn create_vertices(
     let mut uvs: Vec<[f32; 2]> = Vec::with_capacity(12);
     let mut indices: Vec<u32> = Vec::with_capacity(12);
     for i in 0..32 {
+        let base = vertices.len() as u32;
+
+        // tesselate this patch
         let this_patch = &cpts[i];
         let (mut patch_vertices, mut patch_normals, mut patch_uvs, patch_indices) =
             tesselate_patch(this_patch, nr, nc);
 
-        let base = vertices.len() as u32;
+        // append to buffers
         vertices.append(&mut patch_vertices);
         normals.append(&mut patch_normals);
         uvs.append(&mut patch_uvs);
+
+        // indices have to be rebased
         for j in patch_indices {
             indices.push(base + j);
         }
@@ -25,6 +30,7 @@ pub fn create_vertices(
     (vertices, normals, uvs, indices)
 }
 
+// Tesselate a cubic Bezier patch at nr X nc vertices
 fn tesselate_patch(
     cpts: &Vec<Vec<Point3<f32>>>,
     nr: usize,
@@ -66,6 +72,9 @@ fn tesselate_patch(
                 3.0 * u2,
             );
 
+            // Basis matrix times vectors of powers of parameters. See post
+            // on my Mathworks blog for details:
+            // https://blogs.mathworks.com/graphics/2015/05/12/patch-work/
             let w = Matrix4::new(
                 up[0] * vp[0],
                 up[1] * vp[0],
@@ -85,6 +94,7 @@ fn tesselate_patch(
                 up[3] * vp[3],
             );
 
+            // First partials
             let dwdv = Matrix4::new(
                 du[0] * vp[0],
                 du[1] * vp[0],
@@ -141,8 +151,12 @@ fn tesselate_patch(
             }
 
             verts.push([pt[0] as f32, pt[1] as f32, pt[2] as f32, 1.0]);
+
+            // normal is cross of the 2 tangents
+            // @todo handle the coincident control points case
             let normal = tan1.normalize().cross(tan2.normalize());
             norms.push([normal[0] as f32, normal[1] as f32, normal[2] as f32]);
+
             let uv = [u as f32, v as f32];
             uvs.push(uv);
         }

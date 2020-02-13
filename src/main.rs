@@ -95,7 +95,10 @@ fn main() {
     );
 
     // get teapot coordinates
-    let (vertex_data, normal_data, uv_data, index_data) = teapot::create_vertices(32, 32);
+    let num_rows = 18;
+    let num_cols = 23;
+    let (vertex_data, normal_data, uv_data, index_data) =
+        teapot::create_vertices(num_rows, num_cols);
     println!(
         "num verts = {0}, num indices = {1}",
         vertex_data.len(),
