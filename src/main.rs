@@ -9,11 +9,14 @@ const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
     1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.25, 1.0,
 );
 
-fn generate_matrix(aspect_ratio: f32) -> cgmath::Matrix4<f32> {
+fn generate_matrix(aspect_ratio: f32, time: f32) -> cgmath::Matrix4<f32> {
     let mx_projection = cgmath::perspective(cgmath::Deg(35f32), aspect_ratio, 1.0, 10.0);
+    let rad = 7.0f32;
+    let v1 = rad*time.cos();
+    let v2 = rad*time.sin();
     let mx_view = cgmath::Matrix4::look_at(
-        cgmath::Point3::new(3.5f32, 7.0, 7.0),
-        cgmath::Point3::new(0.5f32, 0.0, 1.4),
+        cgmath::Point3::new(v1, v2, rad/2.),
+        cgmath::Point3::new(0.0f32, 0.0, 1.4),
         cgmath::Vector3::unit_z(),
     );
     let mx_correction = OPENGL_TO_WGPU_MATRIX;
@@ -129,12 +132,15 @@ fn main() {
     let aspect_ratio = 1.;
     let mut prev_width = 0;
     let mut prev_height = 0;
-    let mx_total = generate_matrix(aspect_ratio);
+    let mx_total = generate_matrix(aspect_ratio,0.0f32);
     let mx_ref: &[f32; 16] = mx_total.as_ref();
     let uniform_buf = device.create_buffer_with_data(
         mx_ref.as_bytes(),
         wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
     );
+
+    let start_time = std::time::SystemTime::now();
+    let mut prev_time = start_time;
 
     // Bind uniform_buf
     let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -312,9 +318,11 @@ fn main() {
                     });
 
                     // if window aspect ratio changed, we have to recreate matrix
-                    if sc_desc.width != prev_width || sc_desc.height != prev_height {
+                    let this_time = std::time::SystemTime::now();
+                    let duration = this_time.duration_since(prev_time);
+                    if duration.unwrap().as_secs_f32() > 0.05 || sc_desc.width != prev_width || sc_desc.height != prev_height {
                         let aspect_ratio = sc_desc.width as f32 / sc_desc.height as f32;
-                        let mx_total = generate_matrix(aspect_ratio);
+                        let mx_total = generate_matrix(aspect_ratio, this_time.duration_since(start_time).unwrap().as_secs_f32());
                         let mx_ref: &[f32; 16] = mx_total.as_ref();
                         let uniform_buf = device.create_buffer_with_data(
                             mx_ref.as_bytes(),
@@ -332,6 +340,7 @@ fn main() {
                         });
                         prev_width = sc_desc.width;
                         prev_height = sc_desc.height;
+                        prev_time = this_time;
                     }
 
                     rpass.set_pipeline(&render_pipeline);
@@ -340,6 +349,7 @@ fn main() {
                     rpass
                         .set_vertex_buffers(0, &[(&vertex_buf, 0), (&normal_buf, 0), (&uv_buf, 0)]);
                     rpass.draw_indexed(0..index_count as u32, 0, 0..1);
+
                 }
 
                 queue.submit(&[encoder.finish()]);

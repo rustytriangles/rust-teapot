@@ -20,13 +20,14 @@ void main() {
     vec3 lightVec = vec3(0.5 * 0.7071, 0.7071,  0.866 * 0.7071);
     vec3 lightColor = vec3(1);
     vec3 matColor = vec3(0.5, 0.25, 1);
-    vec3 eyeVec = vec3(0, 0, 1);
+    
+    vec3 eyeVec = normalize(inverse(mat3(u_Transform))*vec3(0, 0, 1));
 
     gl_Position = u_Transform * a_Pos;
     
     o_diffColor = min(ka + kd * max(dot(a_Nrm, lightVec), 0), 1) * matColor;
     
-    vec3 halfVec = normalize(eyeVec + lightVec);
+    vec3 halfVec = normalize(lightVec - eyeVec);
 
     o_specColor = pow(max(dot(halfVec, a_Nrm), 0), specExp) * lightColor;
 }
