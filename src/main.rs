@@ -75,30 +75,6 @@ fn main() {
         limits: wgpu::Limits::default(),
     });
 
-    // read vertex shader from shader.vert
-    let vs_module = device.create_shader_module(
-        &wgpu::read_spirv(
-            glsl_to_spirv::compile(
-                include_str!("shader.vsh"),
-                glsl_to_spirv::ShaderType::Vertex,
-            )
-            .unwrap(),
-        )
-        .unwrap(),
-    );
-
-    // read fragment shader from shader.frag
-    let fs_module = device.create_shader_module(
-        &wgpu::read_spirv(
-            glsl_to_spirv::compile(
-                include_str!("shader.fsh"),
-                glsl_to_spirv::ShaderType::Fragment,
-            )
-            .unwrap(),
-        )
-        .unwrap(),
-    );
-
     // get teapot coordinates
     let num_rows = 18;
     let num_cols = 23;
@@ -160,6 +136,13 @@ fn main() {
             },
         }],
     });
+
+    let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+        label: None,
+        source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shader.wgsl"))),
+        flags: wgpu::ShaderFlags::all(),
+    });
+
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         bind_group_layouts: &[&bind_group_layout],
     });
@@ -167,12 +150,12 @@ fn main() {
     let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         layout: &pipeline_layout,
         vertex_stage: wgpu::ProgrammableStageDescriptor {
-            module: &vs_module,
-            entry_point: "main",
+            module: &shader,
+            entry_point: "vs_main",
         },
         fragment_stage: Some(wgpu::ProgrammableStageDescriptor {
-            module: &fs_module,
-            entry_point: "main",
+            module: &shader,
+            entry_point: "fs_main",
         }),
         rasterization_state: Some(wgpu::RasterizationStateDescriptor {
             front_face: wgpu::FrontFace::Ccw,
