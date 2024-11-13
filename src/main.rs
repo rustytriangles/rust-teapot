@@ -88,21 +88,35 @@ fn main() {
 
     // VERTEX buffer
     let vertex_size = std::mem::size_of::<[f32; 4]>();
-    let vertex_buf =
-        device.create_buffer_with_data(vertex_data.as_bytes(), wgpu::BufferUsage::VERTEX);
+    let vertex_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("Vertex Buffer"),
+	contents = vertex_data.as_bytes(),
+	usage: wgpu::BufferUsages::VERTEX,
+    });
 
     // NORMAL buffer
     let normal_size = std::mem::size_of::<[f32; 3]>();
-    let normal_buf =
-        device.create_buffer_with_data(normal_data.as_bytes(), wgpu::BufferUsage::VERTEX);
+    let normal_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("Normal Buffer"),
+	contents = normal_data.as_bytes(),
+	usage: wgpu::BufferUsages::NORMAL,
+    });
 
     // UV buffer
     let uv_size = std::mem::size_of::<[f32; 2]>();
-    let uv_buf = device.create_buffer_with_data(uv_data.as_bytes(), wgpu::BufferUsage::VERTEX);
+    let uv_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("UV Buffer");
+	contents = uv_data.as_bytes(),
+	usage: wgpu::BufferUsages::VERTEX,
+    });
 
     // INDEX buffer
     let index_count = index_data.len();
-    let index_buf = device.create_buffer_with_data(index_data.as_bytes(), wgpu::BufferUsage::INDEX);
+    let index_buf = device.create_buffer_init(&wgpu::Util::BufferInitDescriptor {
+        label: Some("Index Buffer"),
+	contents: index_data.as_bytes(),
+	usage: wgpu::BufferUsages::INDEX,
+    });
 
     // u_Transform
     let aspect_ratio = 1.;
@@ -110,10 +124,11 @@ fn main() {
     let mut prev_height = 0;
     let mx_total = generate_matrix(aspect_ratio,0.0f32);
     let mx_ref: &[f32; 16] = mx_total.as_ref();
-    let uniform_buf = device.create_buffer_with_data(
-        mx_ref.as_bytes(),
-        wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
-    );
+    let uniform_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some("Uniform Buffer"),
+	contents: mx_ref.as_bytes(),
+	usage: wgpu::BufferUsages::UNIFORM  wgpu::BufferUsages::COPY_DST,
+    });
 
     let start_time = std::time::SystemTime::now();
     let mut prev_time = start_time;
