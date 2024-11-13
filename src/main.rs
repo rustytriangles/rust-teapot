@@ -147,7 +147,7 @@ fn main() {
 	        },
 	        count: None,
 	    },
-	},
+	],
     });
 
 //    let mut bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
