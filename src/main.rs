@@ -90,7 +90,7 @@ fn main() {
     let vertex_size = std::mem::size_of::<[f32; 4]>();
     let vertex_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Vertex Buffer"),
-	contents = vertex_data.as_bytes(),
+	contents: vertex_data.as_bytes(),
 	usage: wgpu::BufferUsages::VERTEX,
     });
 
@@ -98,15 +98,15 @@ fn main() {
     let normal_size = std::mem::size_of::<[f32; 3]>();
     let normal_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Normal Buffer"),
-	contents = normal_data.as_bytes(),
+	contents: normal_data.as_bytes(),
 	usage: wgpu::BufferUsages::NORMAL,
     });
 
     // UV buffer
     let uv_size = std::mem::size_of::<[f32; 2]>();
     let uv_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-        label: Some("UV Buffer");
-	contents = uv_data.as_bytes(),
+        label: Some("UV Buffer"),
+	contents: uv_data.as_bytes(),
 	usage: wgpu::BufferUsages::VERTEX,
     });
 
@@ -127,7 +127,7 @@ fn main() {
     let uniform_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Uniform Buffer"),
 	contents: mx_ref.as_bytes(),
-	usage: wgpu::BufferUsages::UNIFORM  wgpu::BufferUsages::COPY_DST,
+	usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
     });
 
     let start_time = std::time::SystemTime::now();
