@@ -33,15 +33,16 @@ fn main() {
     let event_loop = EventLoop::new();
 
     #[cfg(not(feature = "gl"))]
+    let instance = wgpu::Instance::new(wgpu::BackendBit::all());
     let (window, size, surface) = {
         let window = winit::window::Window::new(&event_loop).unwrap();
         let size = window.inner_size();
-        let surface = wgpu::Surface::create(&window);
+        let surface = unsafe { instance.create_surface(&window) };
         (window, size, surface)
     };
 
     #[cfg(feature = "gl")]
-    let (window, instance, size, surface) = {
+    let (window, size, surface) = {
         let wb = winit::WindowBuilder::new();
         let cb = wgpu::glutin::ContextBuilder::new().with_vsync(true);
         let context = cb.build_windowed(wb, &event_loop).unwrap();
@@ -54,19 +55,18 @@ fn main() {
 
         let (context, window) = unsafe { context.make_current().unwrap().split() };
 
-        let instance = wgpu::Instance::new(context);
         let surface = instance.get_surface();
 
-        (window, instance, size, surface)
+        (window, size, surface)
     };
 
-    let adapter = wgpu::Adapter::request(
+    let adapter = instance.request_adapter(
         &wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::Default,
-        },
-        wgpu::BackendBit::PRIMARY,
-    )
-    .unwrap();
+	    compatible_surface: Some(&surface),
+        })
+        .await
+	.expect("Failed to find an appropriate adapter");
 
     let (device, queue) = adapter.request_device(&wgpu::DeviceDescriptor {
         extensions: wgpu::Extensions {
