@@ -33,7 +33,7 @@ fn main() {
     let event_loop = EventLoop::new();
 
     #[cfg(not(feature = "gl"))]
-    let instance = wgpu::Instance::new(wgpu::BackendBit::all());
+    let instance = wgpu::Instance::default();
     let (window, size, surface) = {
         let window = winit::window::Window::new(&event_loop).unwrap();
         let size = window.inner_size();
