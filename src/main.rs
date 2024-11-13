@@ -112,7 +112,7 @@ fn main() {
 
     // INDEX buffer
     let index_count = index_data.len();
-    let index_buf = device.create_buffer_init(&wgpu::Util::BufferInitDescriptor {
+    let index_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("Index Buffer"),
 	contents: index_data.as_bytes(),
 	usage: wgpu::BufferUsages::INDEX,
@@ -135,22 +135,31 @@ fn main() {
 
     // Bind uniform_buf
     let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-        bindings: &[wgpu::BindGroupLayoutBinding {
-            binding: 0,
-            visibility: wgpu::ShaderStage::VERTEX,
-            ty: wgpu::BindingType::UniformBuffer { dynamic: false },
-        }],
+        label: None,
+	entries: &[
+	    wgpu::BindGroupLayoutEntry {
+	        binding: 0,
+	        visibility: wgpu::ShaderStages::VERTEX,
+	        ty: wgpu::BindingType::Buffer {
+	            ty: wgpu::BufferBindingType::Uniform,
+		    has_dynamic_offset: false,
+		    win_binding_size: wgpu::BufferSize::new(64),
+	        },
+	        count: None,
+	    },
+	},
     });
-    let mut bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-        layout: &bind_group_layout,
-        bindings: &[wgpu::Binding {
-            binding: 0,
-            resource: wgpu::BindingResource::Buffer {
-                buffer: &uniform_buf,
-                range: 0..64,
-            },
-        }],
-    });
+
+//    let mut bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+//        layout: &bind_group_layout,
+//        bindings: &[wgpu::Binding {
+//            binding: 0,
+//            resource: wgpu::BindingResource::Buffer {
+//                buffer: &uniform_buf,
+//                range: 0..64,
+//            },
+//        }],
+//    });
 
     let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
         label: None,
