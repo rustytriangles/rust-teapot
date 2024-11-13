@@ -164,7 +164,6 @@ fn main() {
     let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
         label: None,
         source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shader.wgsl"))),
-        flags: wgpu::ShaderFlags::all(),
     });
 
     let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -172,8 +171,47 @@ fn main() {
     });
 
     let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-        layout: &pipeline_layout,
-        vertex_stage: wgpu::ProgrammableStageDescriptor {
+        label: None,
+        layout: Some(&pipeline_layout),
+	vertex: wgpu::VertexState {
+	    module: &shader,
+	    entry_point: Some("vs_main"),
+	    compilation_options: Default::default(),
+	    buffers, &vertex_buffers,
+	},
+	fragment: Some(wgpu::FragmentState {
+	    module: &shader,
+	    entry_point: Some("fs_main"),
+	    compilation_options: Default::default(),
+	    targets: &[Some(wgpu::ColorTargetState {
+	        format: config.view_formats[0],
+		blend: Some(wgpu::BlendState {
+		    color: wgpu::BlendComponent {
+		        operation: wgpu::BlendOperation::Add,
+			src_factor: wgpu::BlendFactor::SrcAlpha,
+			dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+		    },
+		    alpha: wgpu::BlendComponent::REPLACE,
+		}),
+		write_mask: wgpu::ColorWrites::All,
+	    })],
+	}),
+	primitive: wgpu::PrimitiveState {
+	    front_face: wgpu::FrontFace::Ccw,
+	    cull_mode: wgpu::CullMode::None,
+	    polygon_mode: wgpu::PolygonMode::Fill,
+	    ..Default::default()
+	},
+	depth_stencil: None,
+	multisample: wgpu::MultisampleState::default(),
+	multiview: None,
+	cache: None,
+    });
+
+    /**
+    
+        vertex_stage: wgpu::ProgrammableS
+	tageDescriptor {
             module: &shader,
             entry_point: "vs_main",
         },
@@ -183,7 +221,7 @@ fn main() {
         }),
         rasterization_state: Some(wgpu::RasterizationStateDescriptor {
             front_face: wgpu::FrontFace::Ccw,
-            cull_mode: wgpu::CullMode::None,
+//            cull_mode: wgpu::CullMode::None,
             depth_bias: 0,
             depth_bias_slope_scale: 0.0,
             depth_bias_clamp: 0.0,
@@ -241,7 +279,7 @@ fn main() {
         sample_mask: !0,
         alpha_to_coverage_enabled: false,
     });
-
+**/
     let mut sc_desc = wgpu::SwapChainDescriptor {
         usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
         format: wgpu::TextureFormat::Bgra8UnormSrgb,
